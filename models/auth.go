@@ -52,5 +52,7 @@ func HandleRegister(user User) error {
 		}
 		return err
 	}
+	check, _ := CheckUser(user.Email)
+	MakeAccountBalance(check.Id, float64(0))
 	return nil
 }
