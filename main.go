@@ -7,10 +7,12 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
 	db, _ := utils.DBConnect()
+	godotenv.Load()
 	defer db.Close()
 	r := gin.Default()
 	routers.CombineRouter(r)

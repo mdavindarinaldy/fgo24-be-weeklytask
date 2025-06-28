@@ -8,12 +8,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/joho/godotenv"
 )
 
 func VerifyToken() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		godotenv.Load() // ini baiknya dipindah ke main aja biar ga overhead
 		secretKey := os.Getenv("APP_SECRET")
 		token := strings.Split(ctx.GetHeader("Authorization"), "Bearer ")
 
