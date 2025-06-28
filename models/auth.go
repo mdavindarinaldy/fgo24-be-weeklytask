@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func CheckUser(email string) (User, error) {
+func GetUserByEmail(email string) (User, error) {
 	conn, err := utils.DBConnect()
 	if err != nil {
 		return User{}, err
@@ -52,7 +52,7 @@ func HandleRegister(user User) error {
 		}
 		return err
 	}
-	check, _ := CheckUser(user.Email)
+	check, _ := GetUserByEmail(user.Email)
 	MakeAccountBalance(check.Id, float64(0))
 	return nil
 }

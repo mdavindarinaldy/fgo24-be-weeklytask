@@ -39,7 +39,7 @@ func AuthLogin(c *gin.Context) {
 		Pin      string `form:"pin" json:"pin" db:"pin" binding:"required"`
 	}{}
 	c.ShouldBind(&user)
-	userData, err := models.CheckUser(user.Email)
+	userData, err := models.GetUserByEmail(user.Email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, utils.Response{
 			Success: false,
