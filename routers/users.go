@@ -9,5 +9,5 @@ import (
 
 func userRouter(r *gin.RouterGroup) {
 	r.Use(middlewares.VerifyToken())
-	r.POST("/update-profile", controllers.UpdateProfile)
+	r.PUT("/update-profile", controllers.UpdateProfile)
 }
