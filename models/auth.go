@@ -3,6 +3,8 @@ package models
 import (
 	"backend3/utils"
 	"context"
+	"errors"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -27,6 +29,10 @@ func CheckUser(email string) (User, error) {
 }
 
 func HandleRegister(user User) error {
+	if user.Email == "" || user.Name == "" || user.Password == "" || user.PhoneNumber == "" || user.Pin == "" {
+		return errors.New("user data should not be empty")
+	}
+
 	conn, err := utils.DBConnect()
 	if err != nil {
 		return err
@@ -41,6 +47,9 @@ func HandleRegister(user User) error {
 		`,
 		user.Name, user.Email, user.PhoneNumber, user.Password, user.Pin)
 	if err != nil {
+		if strings.Contains(strings.ToLower(err.Error()), "duplicate key") {
+			return errors.New("email already used by another user")
+		}
 		return err
 	}
 	return nil

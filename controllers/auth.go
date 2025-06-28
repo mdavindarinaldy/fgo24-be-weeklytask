@@ -13,6 +13,13 @@ func AuthRegister(c *gin.Context) {
 	c.ShouldBind(&user)
 	err := models.HandleRegister(user)
 	if err != nil {
+		if err.Error() == "email already used by another user" || err.Error() == "user data should not be empty" {
+			c.JSON(http.StatusBadRequest, utils.Response{
+				Success: false,
+				Message: err.Error(),
+			})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, utils.Response{
 			Success: false,
 			Message: "Failed to register user",
