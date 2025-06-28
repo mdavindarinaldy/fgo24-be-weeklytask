@@ -1,7 +1,13 @@
 package routers
 
-import "github.com/gin-gonic/gin"
+import (
+	"backend3/controllers"
+	"backend3/middlewares"
+
+	"github.com/gin-gonic/gin"
+)
 
 func userRouter(r *gin.RouterGroup) {
-	// r.POST("/")
+	r.Use(middlewares.VerifyToken())
+	r.POST("/update-profile", controllers.UpdateProfile)
 }
