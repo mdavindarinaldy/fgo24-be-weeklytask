@@ -3,7 +3,6 @@ package controllers
 import (
 	"backend3/models"
 	"backend3/utils"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -33,7 +32,13 @@ func Transfer(c *gin.Context) {
 	userId, _ := c.Get("userId")
 	err := models.HandleTransfer(transfer, int(userId.(float64)))
 	if err != nil {
-		fmt.Println(err)
+		if err.Error() == "insufficient balance" {
+			c.JSON(http.StatusBadRequest, utils.Response{
+				Success: false,
+				Message: err.Error(),
+			})
+			return
+		}
 		c.JSON(http.StatusBadRequest, utils.Response{
 			Success: false,
 			Message: "Transfer failed! Please try again",

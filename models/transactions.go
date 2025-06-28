@@ -3,6 +3,7 @@ package models
 import (
 	"backend3/utils"
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -80,6 +81,10 @@ func HandleTransfer(request TransferRequest, userId int) error {
 		return err
 	}
 	defer conn.Close()
+	senderBalance := GetLatestBalance(userId)
+	if senderBalance < request.Nominal {
+		return errors.New("insufficient balance")
+	}
 	_, err = conn.Exec(context.Background(),
 		`
 		INSERT INTO transactions (nominal, type, id_user, id_other_user, notes) 
@@ -88,7 +93,6 @@ func HandleTransfer(request TransferRequest, userId int) error {
 	if err != nil {
 		return err
 	}
-	senderBalance := GetLatestBalance(userId)
 	newSenderBalance := senderBalance - request.Nominal
 	MakeAccountBalance(userId, newSenderBalance)
 
