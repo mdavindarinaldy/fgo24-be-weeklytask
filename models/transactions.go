@@ -13,6 +13,12 @@ type TopUpRequest struct {
 	Nominal float64 `form:"nominal" json:"nominal" binding:"required"`
 }
 
+type TransferRequest struct {
+	Nominal     float64 `form:"nominal" json:"nominal" binding:"required"`
+	OtherUserId int     `form:"otherUserId" json:"otherUserId" binding:"required"`
+	Notes       string  `form:"notes" json:"notes"`
+}
+
 func MakeAccountBalance(id int, balance float64) error {
 	conn, err := utils.DBConnect()
 	if err != nil {
@@ -64,7 +70,30 @@ func HandleTopUp(request TopUpRequest, userId int) error {
 	}
 	currentBalance := GetLatestBalance(userId)
 	newBalance := currentBalance + request.Nominal
-	fmt.Println(currentBalance)
 	MakeAccountBalance(userId, newBalance)
+	return nil
+}
+
+func HandleTransfer(request TransferRequest, userId int) error {
+	conn, err := utils.DBConnect()
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	_, err = conn.Exec(context.Background(),
+		`
+		INSERT INTO transactions (nominal, type, id_user, id_other_user, notes) 
+		VALUES ($1,'expense',$2,$3,$4)
+		`, request.Nominal, userId, request.OtherUserId, request.Notes)
+	if err != nil {
+		return err
+	}
+	senderBalance := GetLatestBalance(userId)
+	newSenderBalance := senderBalance - request.Nominal
+	MakeAccountBalance(userId, newSenderBalance)
+
+	receiverBalance := GetLatestBalance(request.OtherUserId)
+	newReceiverBalance := receiverBalance + request.Nominal
+	MakeAccountBalance(request.OtherUserId, newReceiverBalance)
 	return nil
 }

@@ -3,6 +3,7 @@ package controllers
 import (
 	"backend3/models"
 	"backend3/utils"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -27,5 +28,20 @@ func TopUp(c *gin.Context) {
 }
 
 func Transfer(c *gin.Context) {
-
+	transfer := models.TransferRequest{}
+	c.ShouldBind(&transfer)
+	userId, _ := c.Get("userId")
+	err := models.HandleTransfer(transfer, int(userId.(float64)))
+	if err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusBadRequest, utils.Response{
+			Success: false,
+			Message: "Transfer failed! Please try again",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "Transfer success",
+	})
 }
