@@ -19,7 +19,7 @@ CREATE TYPE type_transaction AS ENUM ('income','expense');
 
 CREATE TABLE transactions (
     id SERIAL PRIMARY KEY,
-    transactions_date DATE NOT NULL,
+    transactions_date TIMESTAMP DEFAULT NOW(),
     nominal DECIMAL(10,2),
     type type_transaction NOT NULL,
     id_user INT REFERENCES users(id),
@@ -37,3 +37,6 @@ UPDATE users SET name = 'davinda' WHERE id = 1;
 INSERT INTO users (name, email, phone_number, password, pin)
 VALUES ('abc','naldy@gmail.com','089','1234','1234');
 
+SELECT * FROM user_balance WHERE id_user=1 
+ORDER BY created_at DESC
+LIMIT 1;
