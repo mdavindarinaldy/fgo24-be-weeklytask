@@ -23,12 +23,17 @@ CREATE TABLE transactions (
     nominal DECIMAL(10,2),
     type type_transaction NOT NULL,
     id_user INT REFERENCES users(id),
-    id_other_user INT REFERENCES users(id)
-    -- notes????
+    id_other_user INT REFERENCES users(id),
+    notes TEXT
 );
 
 SELECT * FROM users;
 DROP TABLE users;
 DROP TABLE user_balance;
 DROP TABLE transactions;
+
+UPDATE users SET name = 'davinda' WHERE id = 1;
+
+INSERT INTO users (name, email, phone_number, password, pin)
+VALUES ('abc','naldy@gmail.com','089','1234','1234');
 
