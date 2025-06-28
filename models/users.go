@@ -5,6 +5,8 @@ import (
 	"context"
 	"errors"
 	"strings"
+
+	"github.com/jackc/pgx/v5"
 )
 
 type User struct {
@@ -45,4 +47,40 @@ func HandleUpdate(user User, id int) error {
 	return nil
 }
 
-func GetUsers() {}
+func GetUserByEmail(email string) (User, error) {
+	conn, err := utils.DBConnect()
+	if err != nil {
+		return User{}, err
+	}
+	defer conn.Close()
+	rows, err := conn.Query(context.Background(),
+		`SELECT * FROM users WHERE email=$1`, email)
+
+	if err != nil {
+		return User{}, err
+	}
+	user, err := pgx.CollectOneRow[User](rows, pgx.RowToStructByName)
+	if err != nil {
+		return User{}, err
+	}
+	return user, nil
+}
+
+func GetDetailUser(id int) (User, error) {
+	conn, err := utils.DBConnect()
+	if err != nil {
+		return User{}, err
+	}
+	defer conn.Close()
+	rows, err := conn.Query(context.Background(),
+		`SELECT * FROM users WHERE id=$1`, id)
+
+	if err != nil {
+		return User{}, err
+	}
+	user, err := pgx.CollectOneRow[User](rows, pgx.RowToStructByName)
+	if err != nil {
+		return User{}, err
+	}
+	return user, nil
+}
