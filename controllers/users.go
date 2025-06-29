@@ -73,15 +73,6 @@ func GetAllUsers(c *gin.Context) {
 		})
 		return
 	}
-	var ResponseUsers []utils.ResponseUsers
-	for _, v := range users {
-		ResponseUsers = append(ResponseUsers, utils.ResponseUsers{
-			Id:          v.Id,
-			Name:        v.Name,
-			Email:       v.Email,
-			PhoneNumber: v.PhoneNumber,
-		})
-	}
 	c.JSON(http.StatusOK, utils.Response{
 		Success: true,
 		Message: "Success to get users",
@@ -90,6 +81,6 @@ func GetAllUsers(c *gin.Context) {
 			TotalPage:   pageData.TotalPage,
 			TotalData:   pageData.TotalData,
 		},
-		Result: ResponseUsers,
+		Result: users,
 	})
 }

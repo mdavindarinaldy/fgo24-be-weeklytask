@@ -91,10 +91,10 @@ func GetDetailUser(id int) (User, error) {
 	return user, nil
 }
 
-func GetAllUsers(search string, page int) ([]User, PageData, error) {
+func GetAllUsers(search string, page int) ([]utils.ResponseUsers, PageData, error) {
 	conn, err := utils.DBConnect()
 	if err != nil {
-		return []User{}, PageData{}, err
+		return []utils.ResponseUsers{}, PageData{}, err
 	}
 	defer conn.Close()
 
@@ -106,11 +106,11 @@ func GetAllUsers(search string, page int) ([]User, PageData, error) {
 		WHERE name ILIKE $1 
 		OR phone_number ILIKE $1`, "%"+search+"%")
 	if err != nil {
-		return []User{}, PageData{}, err
+		return []utils.ResponseUsers{}, PageData{}, err
 	}
 	countData, err := pgx.CollectOneRow[Count](count, pgx.RowToStructByName)
 	if err != nil {
-		return []User{}, PageData{}, err
+		return []utils.ResponseUsers{}, PageData{}, err
 	}
 
 	offset := (page - 1) * 5
@@ -134,18 +134,18 @@ func GetAllUsers(search string, page int) ([]User, PageData, error) {
 	}
 
 	rows, err := conn.Query(context.Background(),
-		`SELECT * FROM users 
+		`SELECT id, name, email, phone_number FROM users 
 		WHERE name ILIKE $1 
 		OR phone_number ILIKE $1
 		OFFSET $2
 		LIMIT 5`, "%"+search+"%", offset)
 
 	if err != nil {
-		return []User{}, PageData{}, err
+		return []utils.ResponseUsers{}, PageData{}, err
 	}
-	users, err := pgx.CollectRows[User](rows, pgx.RowToStructByName)
+	users, err := pgx.CollectRows[utils.ResponseUsers](rows, pgx.RowToStructByName)
 	if err != nil {
-		return []User{}, PageData{}, err
+		return []utils.ResponseUsers{}, PageData{}, err
 	}
 
 	return users, pageData, nil
