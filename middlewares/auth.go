@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"backend3/models"
 	"backend3/utils"
 	"net/http"
 	"os"
@@ -16,6 +17,24 @@ func VerifyToken() gin.HandlerFunc {
 		token := strings.Split(ctx.GetHeader("Authorization"), "Bearer ")
 
 		if len(token) < 2 {
+			ctx.JSON(http.StatusUnauthorized, utils.Response{
+				Success: false,
+				Message: "Unauthorized",
+			})
+			ctx.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		isBlacklisted, err := models.IsTokenBlacklisted(token[1])
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, utils.Response{
+				Success: false,
+				Message: "Internal server error",
+			})
+			ctx.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+		if isBlacklisted {
 			ctx.JSON(http.StatusUnauthorized, utils.Response{
 				Success: false,
 				Message: "Unauthorized",
