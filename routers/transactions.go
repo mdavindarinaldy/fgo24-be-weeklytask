@@ -13,4 +13,5 @@ func transactionRouter(r *gin.RouterGroup) {
 	r.POST("/transfer", controllers.Transfer)
 	r.GET("/history-expense", controllers.HistoryExpenseTransaction)
 	r.GET("/history-income", controllers.HistoryIncomeTransaction)
+	r.GET("/history", controllers.HistoryTransaction)
 }

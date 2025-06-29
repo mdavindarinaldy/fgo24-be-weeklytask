@@ -97,3 +97,26 @@ func HistoryIncomeTransaction(c *gin.Context) {
 		Result: transactions,
 	})
 }
+
+func HistoryTransaction(c *gin.Context) {
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	userId, _ := c.Get("userId")
+	transactions, pageData, err := models.GetHistoryTransactions(int(userId.(float64)), page)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Internal Server Error",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "Success to get data history income transactions",
+		PageInfo: models.PageData{
+			CurrentPage: pageData.CurrentPage,
+			TotalPage:   pageData.TotalPage,
+			TotalData:   pageData.TotalData,
+		},
+		Result: transactions,
+	})
+}
