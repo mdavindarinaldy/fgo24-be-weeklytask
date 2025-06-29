@@ -84,3 +84,25 @@ func GetAllUsers(c *gin.Context) {
 		Result: users,
 	})
 }
+
+func GetLatestBalance(c *gin.Context) {
+	userId, _ := c.Get("userId")
+	balance := models.GetLatestBalance(int(userId.(float64)))
+	c.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "Success to get user's balance",
+		Result: struct {
+			Balance float64 `json:"balance"`
+		}{
+			Balance: balance,
+		},
+	})
+}
+
+func GetTotalExpense(c *gin.Context) {
+
+}
+
+func GetTotalIncome(c *gin.Context) {
+
+}

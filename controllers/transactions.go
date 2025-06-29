@@ -74,17 +74,3 @@ func HistoryTransaction(c *gin.Context) {
 		Result: transactions,
 	})
 }
-
-func GetLatestBalance(c *gin.Context) {
-	// userId, _ := c.Get("userId")
-	// balance := models.GetLatestBalance(int(userId.(float64)))
-
-}
-
-func GetTotalExpense(c *gin.Context) {
-
-}
-
-func GetTotalIncome(c *gin.Context) {
-
-}

@@ -12,4 +12,5 @@ func userRouter(r *gin.RouterGroup) {
 	r.PUT("/update-profile", controllers.UpdateProfile)
 	r.GET("/:id", controllers.GetUser)
 	r.GET("", controllers.GetAllUsers)
+	r.GET("/get-balance", controllers.GetLatestBalance)
 }
