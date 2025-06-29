@@ -6,6 +6,7 @@ Endpoint included in this project:
 1. Auth Flow (Register User & Login User)
 2. Users (Update Profile, Get User By Email, Get All User & Search User by Phone Number and Name)
 3. Transaction (Transfer, Top Up, History Transaction, Balance, Income & Expense)
+4. Logout User
 
 This project also protect endpoint for users and transaction with token (generated when user login) and utilizing middleware to verify the token.
 
@@ -28,8 +29,15 @@ go mod tidy
 ```
 go run main.go
 ```
+## Database Schema
 
-## Entity Relationship Diagram (ERD)
+### Tables
+- **users**: Stores user information (id, name, email, phone number, password, and pin)
+- **user_balance**: Tracks user account balances with references to the users table.
+- **transactions**: Records financial transactions, including top-ups and transfers, with references to sender and receiver users.
+- **blacklist_tokens**: Stores blacklisted JWT tokens to invalidate the token after user logout, ensuring they cannot be used even if they have not yet expired. This table doesn't have any relation with other tables.
+
+### Entity Relationship Diagram (ERD)
 
 ```mermaid
 erDiagram
