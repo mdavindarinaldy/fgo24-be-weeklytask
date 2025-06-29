@@ -5,6 +5,7 @@ import (
 	"backend3/utils"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -58,5 +59,37 @@ func GetUser(c *gin.Context) {
 			Email:       user.Email,
 			PhoneNumber: user.PhoneNumber,
 		},
+	})
+}
+
+func GetAllUsers(c *gin.Context) {
+	search := strings.ToLower(c.DefaultQuery("search", "a"))
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	users, pageData, err := models.GetAllUsers(search, page)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Internal server error",
+		})
+		return
+	}
+	var ResponseUsers []utils.ResponseUsers
+	for _, v := range users {
+		ResponseUsers = append(ResponseUsers, utils.ResponseUsers{
+			Id:          v.Id,
+			Name:        v.Name,
+			Email:       v.Email,
+			PhoneNumber: v.PhoneNumber,
+		})
+	}
+	c.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "Success to get users",
+		PageInfo: models.PageData{
+			CurrentPage: pageData.CurrentPage,
+			TotalPage:   pageData.TotalPage,
+			TotalData:   pageData.TotalData,
+		},
+		Result: ResponseUsers,
 	})
 }

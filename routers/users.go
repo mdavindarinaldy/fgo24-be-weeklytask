@@ -11,4 +11,5 @@ func userRouter(r *gin.RouterGroup) {
 	r.Use(middlewares.VerifyToken())
 	r.PUT("/update-profile", controllers.UpdateProfile)
 	r.GET("/:id", controllers.GetUser)
+	r.GET("", controllers.GetAllUsers)
 }
