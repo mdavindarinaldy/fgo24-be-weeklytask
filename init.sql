@@ -45,4 +45,45 @@ SELECT * FROM users WHERE name ILIKE '%1%' OR phone_number ILIKE '%08%'
 OFFSET 1
 LIMIT 2;
 
-SELECT COUNT(*) AS count FROM users WHERE name ILIKE '%%' OR phone_number ILIKE '%%'
+SELECT COUNT(*) AS count FROM users WHERE name ILIKE '%%' OR phone_number ILIKE '%%';
+
+SELECT t.transactions_date, t.nominal, t.type,  
+t.notes, t.id_other_user, 
+u.name AS other_user_name, 
+u.email AS other_user_email, 
+u.phone_number AS other_user_phone 
+FROM transactions t 
+JOIN users u ON u.id = t.id_other_user
+WHERE t.id_user=1
+ORDER BY t.transactions_date DESC;
+
+SELECT SUM(nominal) AS total_income FROM transactions
+WHERE transactions_date BETWEEN '2025-06-22' AND '2025-06-29'
+AND type='income' AND id_user=1;
+
+SELECT 
+    t.transactions_date, 
+    t.nominal,
+    CASE 
+        WHEN t.type='income' THEN 'income'
+        WHEN t.type='expense' AND t.id_user=2 THEN 'expense'
+        WHEN t.type='expense' AND t.id_other_user=2 THEN 'income'
+    END AS type,
+    t.notes,
+    CASE 
+        WHEN t.type='income' THEN t.id_user
+        WHEN t.type='expense' AND t.id_user=2 THEN t.id_other_user
+        WHEN t.type='expense' AND t.id_other_user=2 THEN t.id_user
+    END AS id_other_user,
+    u.name AS other_user_name,
+    u.email AS other_user_email,
+    u.phone_number AS other_user_phone
+FROM transactions t
+JOIN users u ON 
+    (CASE 
+        WHEN t.type='income' THEN u.id = t.id_user
+        WHEN t.type='expense' AND t.id_user=2 THEN u.id = t.id_other_user
+        WHEN t.type='expense' AND t.id_other_user=2 THEN u.id = t.id_user
+    END)
+WHERE t.id_user=2 OR t.id_other_user=2
+ORDER BY t.transactions_date DESC;
