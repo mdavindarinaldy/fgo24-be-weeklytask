@@ -4,7 +4,6 @@ import (
 	"backend3/utils"
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -18,6 +17,17 @@ type TransferRequest struct {
 	Nominal     float64 `form:"nominal" json:"nominal" binding:"required"`
 	OtherUserId int     `form:"otherUserId" json:"otherUserId" binding:"required"`
 	Notes       string  `form:"notes" json:"notes"`
+}
+
+type Transactions struct {
+	TransactionsDate     time.Time `db:"transactions_date" json:"transactionDate"`
+	Nominal              float64   `db:"nominal" json:"nominal"`
+	Type                 string    `db:"type" json:"type"`
+	Notes                string    `db:"notes" json:"notes"`
+	IdOtherUser          int       `db:"id_other_user" json:"idOtherUser"`
+	OtherUserName        string    `db:"other_user_name" json:"otherUserName"`
+	OtherUserEmail       string    `db:"other_user_email" json:"otherUserEmail"`
+	OtherUserPhoneNumber string    `db:"other_user_phone" json:"otherUserPhone"`
 }
 
 func MakeAccountBalance(id int, balance float64) error {
@@ -51,7 +61,6 @@ func GetLatestBalance(id int) float64 {
 		ORDER BY created_at DESC
 		LIMIT 1`, id)
 	balance, _ := pgx.CollectOneRow[userBalance](rows, pgx.RowToStructByName)
-	fmt.Println(balance)
 	return balance.Balance
 }
 
@@ -100,4 +109,69 @@ func HandleTransfer(request TransferRequest, userId int) error {
 	newReceiverBalance := receiverBalance + request.Nominal
 	MakeAccountBalance(request.OtherUserId, newReceiverBalance)
 	return nil
+}
+
+func GetHistoryTransactions(id int, page int) ([]Transactions, PageData, error) {
+	conn, err := utils.DBConnect()
+	if err != nil {
+		return []Transactions{}, PageData{}, err
+	}
+	defer conn.Close()
+
+	type Count struct {
+		Count int `db:"count"`
+	}
+	count, err := conn.Query(context.Background(),
+		`SELECT COUNT(*) as count FROM transactions 
+		WHERE id_user=$1`, id)
+	if err != nil {
+		return []Transactions{}, PageData{}, err
+	}
+	countData, err := pgx.CollectOneRow[Count](count, pgx.RowToStructByName)
+	if err != nil {
+		return []Transactions{}, PageData{}, err
+	}
+
+	offset := (page - 1) * 5
+	if page == 0 {
+		page = 1
+	} else if ((page * 5) - countData.Count) < 5 {
+		page = 1
+	}
+
+	totalPage := 0
+	if countData.Count%5 != 0 {
+		totalPage = (countData.Count / 5) + 1
+	} else {
+		totalPage = countData.Count / 5
+	}
+
+	pageData := PageData{
+		TotalData:   countData.Count,
+		TotalPage:   totalPage,
+		CurrentPage: page,
+	}
+
+	rows, err := conn.Query(context.Background(),
+		`SELECT t.transactions_date, t.nominal, t.type,  
+		t.notes, t.id_other_user, 
+		u.name AS other_user_name, 
+		u.email AS other_user_email, 
+		u.phone_number AS other_user_phone 
+		FROM transactions t 
+		JOIN users u ON u.id = t.id_other_user
+		WHERE t.id_user=$1
+		ORDER BY t.transactions_date DESC
+		OFFSET $2
+		LIMIT 5`, id, offset)
+
+	if err != nil {
+		return []Transactions{}, PageData{}, err
+	}
+	transactions, err := pgx.CollectRows[Transactions](rows, pgx.RowToStructByName)
+	if err != nil {
+		return []Transactions{}, PageData{}, err
+	}
+
+	return transactions, pageData, nil
 }

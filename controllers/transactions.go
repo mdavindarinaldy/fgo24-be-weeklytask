@@ -4,6 +4,7 @@ import (
 	"backend3/models"
 	"backend3/utils"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -49,4 +50,41 @@ func Transfer(c *gin.Context) {
 		Success: true,
 		Message: "Transfer success",
 	})
+}
+
+func HistoryTransaction(c *gin.Context) {
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	userId, _ := c.Get("userId")
+	transactions, pageData, err := models.GetHistoryTransactions(int(userId.(float64)), page)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Internal Server Error",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "Success to get data",
+		PageInfo: models.PageData{
+			CurrentPage: pageData.CurrentPage,
+			TotalPage:   pageData.TotalPage,
+			TotalData:   pageData.TotalData,
+		},
+		Result: transactions,
+	})
+}
+
+func GetLatestBalance(c *gin.Context) {
+	// userId, _ := c.Get("userId")
+	// balance := models.GetLatestBalance(int(userId.(float64)))
+
+}
+
+func GetTotalExpense(c *gin.Context) {
+
+}
+
+func GetTotalIncome(c *gin.Context) {
+
 }
