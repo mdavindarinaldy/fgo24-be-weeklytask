@@ -19,12 +19,22 @@ type TransferRequest struct {
 	Notes       string  `form:"notes" json:"notes"`
 }
 
-type Transactions struct {
+type TransactionsExpense struct {
 	TransactionsDate     time.Time `db:"transactions_date" json:"transactionDate"`
 	Nominal              float64   `db:"nominal" json:"nominal"`
 	Type                 string    `db:"type" json:"type"`
 	Notes                string    `db:"notes" json:"notes"`
 	IdOtherUser          int       `db:"id_other_user" json:"idOtherUser"`
+	OtherUserName        string    `db:"other_user_name" json:"otherUserName"`
+	OtherUserEmail       string    `db:"other_user_email" json:"otherUserEmail"`
+	OtherUserPhoneNumber string    `db:"other_user_phone" json:"otherUserPhone"`
+}
+
+type TransactionsIncome struct {
+	TransactionsDate     time.Time `db:"transactions_date" json:"transactionDate"`
+	Nominal              float64   `db:"nominal" json:"nominal"`
+	Notes                string    `db:"notes" json:"notes"`
+	IdOtherUser          int       `db:"id_user" json:"idOtherUser"`
 	OtherUserName        string    `db:"other_user_name" json:"otherUserName"`
 	OtherUserEmail       string    `db:"other_user_email" json:"otherUserEmail"`
 	OtherUserPhoneNumber string    `db:"other_user_phone" json:"otherUserPhone"`
@@ -111,10 +121,10 @@ func HandleTransfer(request TransferRequest, userId int) error {
 	return nil
 }
 
-func GetHistoryTransactions(id int, page int) ([]Transactions, PageData, error) {
+func GetHistoryExpenseTransactions(id int, page int) ([]TransactionsExpense, PageData, error) {
 	conn, err := utils.DBConnect()
 	if err != nil {
-		return []Transactions{}, PageData{}, err
+		return []TransactionsExpense{}, PageData{}, err
 	}
 	defer conn.Close()
 
@@ -123,13 +133,13 @@ func GetHistoryTransactions(id int, page int) ([]Transactions, PageData, error) 
 	}
 	count, err := conn.Query(context.Background(),
 		`SELECT COUNT(*) as count FROM transactions 
-		WHERE id_user=$1`, id)
+		WHERE type='expense' AND id_user=$1`, id)
 	if err != nil {
-		return []Transactions{}, PageData{}, err
+		return []TransactionsExpense{}, PageData{}, err
 	}
 	countData, err := pgx.CollectOneRow[Count](count, pgx.RowToStructByName)
 	if err != nil {
-		return []Transactions{}, PageData{}, err
+		return []TransactionsExpense{}, PageData{}, err
 	}
 
 	offset := (page - 1) * 5
@@ -166,12 +176,118 @@ func GetHistoryTransactions(id int, page int) ([]Transactions, PageData, error) 
 		LIMIT 5`, id, offset)
 
 	if err != nil {
-		return []Transactions{}, PageData{}, err
+		return []TransactionsExpense{}, PageData{}, err
 	}
-	transactions, err := pgx.CollectRows[Transactions](rows, pgx.RowToStructByName)
+	transactions, err := pgx.CollectRows[TransactionsExpense](rows, pgx.RowToStructByName)
 	if err != nil {
-		return []Transactions{}, PageData{}, err
+		return []TransactionsExpense{}, PageData{}, err
 	}
 
 	return transactions, pageData, nil
+}
+
+func GetHistoryIncomeTransactions(id int, page int) ([]TransactionsIncome, PageData, error) {
+	conn, err := utils.DBConnect()
+	if err != nil {
+		return []TransactionsIncome{}, PageData{}, err
+	}
+	defer conn.Close()
+
+	type Count struct {
+		Count int `db:"count"`
+	}
+	count, err := conn.Query(context.Background(),
+		`SELECT COUNT(*) as count FROM transactions 
+		WHERE id_other_user=$1`, id)
+	if err != nil {
+		return []TransactionsIncome{}, PageData{}, err
+	}
+	countData, err := pgx.CollectOneRow[Count](count, pgx.RowToStructByName)
+	if err != nil {
+		return []TransactionsIncome{}, PageData{}, err
+	}
+
+	offset := (page - 1) * 5
+	if page == 0 {
+		page = 1
+	} else if ((page * 5) - countData.Count) < 5 {
+		page = 1
+	}
+
+	totalPage := 0
+	if countData.Count%5 != 0 {
+		totalPage = (countData.Count / 5) + 1
+	} else {
+		totalPage = countData.Count / 5
+	}
+
+	pageData := PageData{
+		TotalData:   countData.Count,
+		TotalPage:   totalPage,
+		CurrentPage: page,
+	}
+
+	rows, err := conn.Query(context.Background(),
+		`SELECT t.transactions_date, t.nominal,  
+		t.notes, t.id_user, 
+		u.name AS other_user_name, 
+		u.email AS other_user_email, 
+		u.phone_number AS other_user_phone 
+		FROM transactions t
+		JOIN users u ON u.id = t.id_other_user
+		WHERE id_other_user=$1
+		ORDER BY transactions_date DESC
+		OFFSET $2
+		LIMIT 5`, id, offset)
+
+	if err != nil {
+		return []TransactionsIncome{}, PageData{}, err
+	}
+	transactions, err := pgx.CollectRows[TransactionsIncome](rows, pgx.RowToStructByName)
+	if err != nil {
+		return []TransactionsIncome{}, PageData{}, err
+	}
+
+	return transactions, pageData, nil
+}
+
+func GetTotalIncome(id int) (float64, time.Time, time.Time) {
+	type Income struct {
+		Income float64 `db:"total_income" json:"income"`
+	}
+	conn, _ := utils.DBConnect()
+	defer conn.Close()
+
+	now := time.Now()
+	duration := time.Now().Add(-7 * 24 * time.Hour)
+
+	rows, _ := conn.Query(context.Background(),
+		`
+		SELECT SUM(nominal) AS total_income FROM transactions
+		WHERE transactions_date BETWEEN $1 AND $2 
+		AND ((type='income' AND id_user=$3) 
+		OR (type='expense' AND id_other_user=$3))
+		`, duration, now, id)
+	income, _ := pgx.CollectOneRow[Income](rows, pgx.RowToStructByName)
+	return income.Income, now, duration
+}
+
+func GetTotalExpense(id int) (float64, time.Time, time.Time) {
+	type Expense struct {
+		Expense float64 `db:"total_expense" json:"expense"`
+	}
+	conn, _ := utils.DBConnect()
+	defer conn.Close()
+
+	now := time.Now()
+	duration := time.Now().Add(-7 * 24 * time.Hour)
+
+	rows, _ := conn.Query(context.Background(),
+		`
+		SELECT SUM(nominal) AS total_expense FROM transactions
+		WHERE transactions_date BETWEEN $1 AND $2 
+		AND type='expense' AND id_user=$3
+		`, duration, now, id)
+	expense, _ := pgx.CollectOneRow[Expense](rows, pgx.RowToStructByName)
+	return expense.Expense, now, duration
 }

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -99,10 +100,46 @@ func GetLatestBalance(c *gin.Context) {
 	})
 }
 
-func GetTotalExpense(c *gin.Context) {
-
+func GetTotalIncome(c *gin.Context) {
+	userId, _ := c.Get("userId")
+	income, now, duration := models.GetTotalIncome(int(userId.(float64)))
+	c.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "Success to get user's income",
+		Result: struct {
+			Income   float64 `json:"income"`
+			Duration any     `json:"duration"`
+		}{
+			Income: income,
+			Duration: struct {
+				TimeStart time.Time `json:"timeStart"`
+				TimeEnd   time.Time `json:"timeEnd"`
+			}{
+				TimeStart: duration,
+				TimeEnd:   now,
+			},
+		},
+	})
 }
 
-func GetTotalIncome(c *gin.Context) {
-
+func GetTotalExpense(c *gin.Context) {
+	userId, _ := c.Get("userId")
+	expense, now, duration := models.GetTotalExpense(int(userId.(float64)))
+	c.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "Success to get user's expense",
+		Result: struct {
+			Expense  float64 `json:"expense"`
+			Duration any     `json:"duration"`
+		}{
+			Expense: expense,
+			Duration: struct {
+				TimeStart time.Time `json:"timeStart"`
+				TimeEnd   time.Time `json:"timeEnd"`
+			}{
+				TimeStart: duration,
+				TimeEnd:   now,
+			},
+		},
+	})
 }

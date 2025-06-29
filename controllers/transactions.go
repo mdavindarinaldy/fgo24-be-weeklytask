@@ -52,10 +52,10 @@ func Transfer(c *gin.Context) {
 	})
 }
 
-func HistoryTransaction(c *gin.Context) {
+func HistoryExpenseTransaction(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	userId, _ := c.Get("userId")
-	transactions, pageData, err := models.GetHistoryTransactions(int(userId.(float64)), page)
+	transactions, pageData, err := models.GetHistoryExpenseTransactions(int(userId.(float64)), page)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, utils.Response{
 			Success: false,
@@ -65,7 +65,30 @@ func HistoryTransaction(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, utils.Response{
 		Success: true,
-		Message: "Success to get data",
+		Message: "Success to get data history expense transactions",
+		PageInfo: models.PageData{
+			CurrentPage: pageData.CurrentPage,
+			TotalPage:   pageData.TotalPage,
+			TotalData:   pageData.TotalData,
+		},
+		Result: transactions,
+	})
+}
+
+func HistoryIncomeTransaction(c *gin.Context) {
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	userId, _ := c.Get("userId")
+	transactions, pageData, err := models.GetHistoryIncomeTransactions(int(userId.(float64)), page)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Internal Server Error",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "Success to get data history income transactions",
 		PageInfo: models.PageData{
 			CurrentPage: pageData.CurrentPage,
 			TotalPage:   pageData.TotalPage,
