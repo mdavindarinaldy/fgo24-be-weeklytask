@@ -4,11 +4,13 @@ import (
 	"backend3/models"
 	"backend3/utils"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func UpdateProfile(c *gin.Context) {
@@ -141,5 +143,28 @@ func GetTotalExpense(c *gin.Context) {
 				TimeEnd:   now,
 			},
 		},
+	})
+}
+
+func Logout(c *gin.Context) {
+	secretKey := os.Getenv("APP_SECRET")
+	token := strings.Split(c.GetHeader("Authorization"), "Bearer ")
+	rawToken, _ := jwt.Parse(token[1], func(t *jwt.Token) (any, error) {
+		return []byte(secretKey), nil
+	})
+	var expiresAt time.Time = time.Unix(int64(rawToken.Claims.(jwt.MapClaims)["exp"].(float64)), 0)
+
+	err := models.AddToBlacklist(token[1], expiresAt)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.Response{
+			Success: false,
+			Message: "Failed to blacklist token",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, utils.Response{
+		Success: true,
+		Message: "Logout successful",
 	})
 }

@@ -15,4 +15,5 @@ func userRouter(r *gin.RouterGroup) {
 	r.GET("/get-balance", controllers.GetLatestBalance)
 	r.GET("/get-income", controllers.GetTotalIncome)
 	r.GET("/get-expense", controllers.GetTotalExpense)
+	r.POST("/logout", controllers.Logout)
 }
