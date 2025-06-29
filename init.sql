@@ -27,6 +27,11 @@ CREATE TABLE transactions (
     notes TEXT
 );
 
+CREATE TABLE blacklist_tokens (
+    token TEXT PRIMARY KEY,
+    expires_at TIMESTAMP NOT NULL
+);
+
 SELECT * FROM users;
 DROP TABLE users;
 DROP TABLE user_balance;
