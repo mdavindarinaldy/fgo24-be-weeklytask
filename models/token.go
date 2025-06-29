@@ -38,3 +38,11 @@ func IsTokenBlacklisted(token string) (bool, error) {
 	}
 	return exists, nil
 }
+
+func CleanBlacklistTokens() {
+	conn, _ := utils.DBConnect()
+	defer conn.Close()
+	conn.Exec(context.Background(),
+		`DELETE FROM blacklist_tokens WHERE expires_at <= $1`,
+		time.Now())
+}
