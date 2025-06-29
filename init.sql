@@ -40,3 +40,9 @@ VALUES ('abc','naldy@gmail.com','089','1234','1234');
 SELECT * FROM user_balance WHERE id_user=1 
 ORDER BY created_at DESC
 LIMIT 1;
+
+SELECT * FROM users WHERE name ILIKE '%1%' OR phone_number ILIKE '%08%'
+OFFSET 1
+LIMIT 2;
+
+SELECT COUNT(*) AS count FROM users WHERE name ILIKE '%%' OR phone_number ILIKE '%%'
