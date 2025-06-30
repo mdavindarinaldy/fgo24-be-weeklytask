@@ -19,7 +19,7 @@ Make sure you already install Go to run this project
 1. Create a new empty directory for the project and navigate into it
 2. Clone this project into the empty current directory:
 ```
-git clone https://github.com/mdavindarinaldy/fgo24-be-weekly.git .
+git clone https://github.com/mdavindarinaldy/fgo24-be-weeklytask.git .
 ``` 
 3. Install dependencies
 ```
