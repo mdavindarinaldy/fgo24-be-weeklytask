@@ -78,22 +78,21 @@ This project use:
 4. godotenv from github.com/joho/godotenv : for loading environment variables from a .env file into the application
 
 ## Overview
-| Method    | Group | Endpoint | Purpose | Header |
-| -------- | ------- | ------- | ------- | ------ |
-| POST  | /auth    | /register | Create new user | Token not needed |
-| POST | /auth     | /login    | Create token for the user | Token not needed |
-| PUT    | /users  | /update-profile | To edit user's profile | Token needed |
-| GET | /users | ?search=&page= | Search users | Token needed |
-| GET | /users | /:id | Get detail user | Token needed | 
-| GET | /users | /balance | Get user's balance | Token needed | 
-| GET | /users | /income | Get user's total income | Token needed | 
-| GET | /users | /expense | Get user's total expense | Token needed | 
-| POST | /users | /logout | To invalidate token (inserting it to blacklist token) | Token needed | 
-| POST | /transactions | /top-up | Top up balance | Token needed | 
-| POST | /transactions | /transfer | To transfer money to other user | Token needed | 
-| GET | /transactions | /history | Get all history transactions | Token needed | 
-| GET | /transactions | /history-expense | Get only 'expense' history transactions | Token needed | 
-| GET | /transactions | /history-income | Get only 'income' history transactions | Token needed | 
+| Method    | Endpoint | Description | Header |
+| -------- | -------  | ------- | ------ |
+| POST  | /auth/register | Create new user | Token not needed |
+| POST | /auth/login    | Create token for the user | Token not needed |
+| PUT    | /profile | To edit user's profile | Token needed |
+| GET | /users?search=&page= | Search users | Token needed |
+| GET | /balance | Get user's balance | Token needed | 
+| GET | /income | Get user's total income | Token needed | 
+| GET | /expense | Get user's total expense | Token needed | 
+| POST | /logout | To invalidate token (inserting it to blacklist token) | Token needed | 
+| POST | /transactions/top-up | Top up balance | Token needed | 
+| POST | /transactions/transfer | To transfer money to other user | Token needed | 
+| GET | /transactions | Get all history transactions | Token needed | 
+| GET | /transactions/expense | Get only 'expense' history transactions | Token needed | 
+| GET | /transactions/income | Get only 'income' history transactions | Token needed | 
 
 
 ## Basic Information
