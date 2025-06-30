@@ -38,32 +38,32 @@ func UpdateProfile(c *gin.Context) {
 	})
 }
 
-func GetUser(c *gin.Context) {
-	id, _ := strconv.Atoi(c.Param("id"))
-	user, err := models.GetDetailUser(id)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.Response{
-			Success: false,
-			Message: "Failed to get detail user",
-		})
-		return
-	}
-	c.JSON(http.StatusOK, utils.Response{
-		Success: true,
-		Message: "Success to get detail user",
-		Result: struct {
-			Id          int
-			Name        string
-			Email       string
-			PhoneNumber string
-		}{
-			Id:          user.Id,
-			Name:        user.Name,
-			Email:       user.Email,
-			PhoneNumber: user.PhoneNumber,
-		},
-	})
-}
+// func GetUser(c *gin.Context) {
+// 	id, _ := strconv.Atoi(c.Param("id"))
+// 	user, err := models.GetDetailUser(id)
+// 	if err != nil {
+// 		c.JSON(http.StatusBadRequest, utils.Response{
+// 			Success: false,
+// 			Message: "Failed to get detail user",
+// 		})
+// 		return
+// 	}
+// 	c.JSON(http.StatusOK, utils.Response{
+// 		Success: true,
+// 		Message: "Success to get detail user",
+// 		Result: struct {
+// 			Id          int
+// 			Name        string
+// 			Email       string
+// 			PhoneNumber string
+// 		}{
+// 			Id:          user.Id,
+// 			Name:        user.Name,
+// 			Email:       user.Email,
+// 			PhoneNumber: user.PhoneNumber,
+// 		},
+// 	})
+// }
 
 func GetAllUsers(c *gin.Context) {
 	search := strings.ToLower(c.DefaultQuery("search", "a"))

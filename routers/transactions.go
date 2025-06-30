@@ -11,7 +11,7 @@ func transactionRouter(r *gin.RouterGroup) {
 	r.Use(middlewares.VerifyToken())
 	r.POST("/top-up", controllers.TopUp)
 	r.POST("/transfer", controllers.Transfer)
-	r.GET("/history-expense", controllers.HistoryExpenseTransaction)
-	r.GET("/history-income", controllers.HistoryIncomeTransaction)
-	r.GET("/history", controllers.HistoryTransaction)
+	r.GET("", controllers.HistoryTransaction)
+	r.GET("/expense", controllers.HistoryExpenseTransaction)
+	r.GET("/income", controllers.HistoryIncomeTransaction)
 }
